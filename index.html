@@ -2,15 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Snake Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Retro Arcade Games</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-container">
         <div class="game-header">
-            <h1 class="game-title">SNAKE</h1>
+            <div class="mode-switcher">
+                <button id="pacmanModeBtn" class="mode-btn active">DOT MUNCHER</button>
+                <button id="snakeModeBtn" class="mode-btn">SNAKE</button>
+                <button id="tetrisModeBtn" class="mode-btn">BLOCK FALL</button>
+            </div>
+            <h1 class="game-title" id="gameTitle">DOT MUNCHER</h1>
             <div class="score-board">
                 <div class="score-item">
                     <span class="score-label">SCORE</span>
@@ -20,14 +28,22 @@
                     <span class="score-label">HIGH</span>
                     <span class="score-value" id="highScore">0</span>
                 </div>
+                <div class="lives-display" id="livesDisplay">
+                    <span class="lives-label">LIVES</span>
+                    <div class="lives-icons" id="lives">
+                        <div class="life-icon">●</div>
+                        <div class="life-icon">●</div>
+                        <div class="life-icon">●</div>
+                    </div>
+                </div>
             </div>
         </div>
         
         <div class="game-area">
-            <canvas id="gameCanvas" width="300" height="300"></canvas>
+            <canvas id="gameCanvas" width="448" height="496"></canvas>
             <div class="game-overlay" id="gameOverlay">
                 <div class="overlay-content">
-                    <h2 id="overlayTitle">SNAKE GAME</h2>
+                    <h2 id="overlayTitle">DOT MUNCHER</h2>
                     <p id="overlayMessage">Use arrow keys to move</p>
                     <button id="startButton" class="retro-button">START GAME</button>
                 </div>
@@ -46,7 +62,13 @@
         </div>
         
         <div class="game-info">
-            <p class="info-text">NOKIA 3210 STYLE</p>
+            <p class="info-text" id="gameInfo">CLASSIC ARCADE STYLE</p>
+            <button id="helpToggle" class="help-toggle">HELP</button>
+            <div class="help-content" id="helpContent">
+                <p class="info-text">Controls: Arrow Keys or Swipe to Move</p>
+                <p class="info-text">Block Fall: ←→ = Move | ↑ = Rotate | Space = Drop</p>
+                <p class="info-text">Shortcuts: P/ESC = Pause | R = Restart</p>
+            </div>
         </div>
     </div>
     

@@ -1,4 +1,4 @@
-/* Retro Snake Game Styles - Nokia 3210 Inspired */
+/* Classic Arcade Games Styles */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 * {
@@ -9,36 +9,75 @@
 
 body {
     font-family: 'Press Start 2P', monospace;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: #000000;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #00ff00;
+    color: #00ffff;
     overflow: hidden;
+    padding: 20px;
+    margin: 0;
 }
 
 .game-container {
-    background: #000000;
-    border: 3px solid #00ff00;
+    background: #0a0a0a;
+    border: 3px solid #00ffff;
     border-radius: 15px;
     padding: 20px;
     box-shadow: 
-        0 0 20px rgba(0, 255, 0, 0.3),
+        0 0 20px rgba(0, 255, 255, 0.3),
         inset 0 0 20px rgba(0, 0, 0, 0.5);
     max-width: 400px;
     width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .game-header {
     text-align: center;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+
+.mode-switcher {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
     margin-bottom: 20px;
+}
+
+.mode-btn {
+    background: #1a1a1a;
+    color: #ffff00;
+    border: 2px solid #ffff00;
+    padding: 8px 16px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+}
+
+.mode-btn:hover {
+    background: #ffff00;
+    color: #000000;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.6);
+}
+
+.mode-btn.active {
+    background: #ffff00;
+    color: #000000;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
 }
 
 .game-title {
     font-size: 24px;
-    color: #00ff00;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    color: #ff00ff;
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
     margin-bottom: 15px;
     letter-spacing: 2px;
 }
@@ -46,8 +85,8 @@ body {
 .score-board {
     display: flex;
     justify-content: space-between;
-    background: #111111;
-    border: 2px solid #00ff00;
+    background: #1a1a1a;
+    border: 2px solid #00ffff;
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 15px;
@@ -62,28 +101,54 @@ body {
 
 .score-label {
     font-size: 8px;
-    color: #00ff00;
+    color: #00ffff;
     opacity: 0.8;
 }
 
 .score-value {
     font-size: 16px;
-    color: #00ff00;
+    color: #ffff00;
     font-weight: bold;
+}
+
+.lives-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.lives-label {
+    font-size: 8px;
+    color: #00ffff;
+    opacity: 0.8;
+}
+
+.lives-icons {
+    display: flex;
+    gap: 5px;
+}
+
+.life-icon {
+    color: #ff00ff;
+    font-size: 12px;
+    text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
 }
 
 .game-area {
     position: relative;
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    flex: 1;
+    min-height: 0;
 }
 
 #gameCanvas {
-    border: 2px solid #00ff00;
+    border: 2px solid #00ffff;
     background: #000000;
     border-radius: 5px;
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
 }
 
 .game-overlay {
@@ -101,13 +166,13 @@ body {
 
 .overlay-content {
     text-align: center;
-    color: #00ff00;
+    color: #00ffff;
 }
 
 .overlay-content h2 {
     font-size: 18px;
     margin-bottom: 15px;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 .overlay-content p {
@@ -117,7 +182,7 @@ body {
 }
 
 .retro-button {
-    background: #00ff00;
+    background: #ffff00;
     color: #000000;
     border: none;
     padding: 12px 24px;
@@ -126,12 +191,13 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
 }
 
 .retro-button:hover {
-    background: #00cc00;
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+    background: #ff00ff;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
     transform: scale(1.05);
 }
 
@@ -143,8 +209,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin-bottom: 15px;
+    flex-shrink: 0;
 }
 
 .control-row {
@@ -155,9 +222,9 @@ body {
 .control-btn {
     width: 50px;
     height: 50px;
-    background: #111111;
-    border: 2px solid #00ff00;
-    color: #00ff00;
+    background: #1a1a1a;
+    border: 2px solid #00ffff;
+    color: #00ffff;
     font-family: 'Press Start 2P', monospace;
     font-size: 20px;
     border-radius: 8px;
@@ -169,9 +236,9 @@ body {
 }
 
 .control-btn:hover {
-    background: #00ff00;
+    background: #00ffff;
     color: #000000;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
 }
 
 .control-btn:active {
@@ -180,13 +247,53 @@ body {
 
 .game-info {
     text-align: center;
+    flex-shrink: 0;
+    margin-bottom: 10px;
 }
 
 .info-text {
     font-size: 8px;
-    color: #00ff00;
+    color: #00ffff;
     opacity: 0.6;
     letter-spacing: 1px;
+}
+
+.help-toggle {
+    background: #1a1a1a;
+    color: #ffff00;
+    border: 2px solid #ffff00;
+    padding: 8px 16px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 10px auto;
+    display: block;
+    box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+}
+
+.help-toggle:hover {
+    background: #ffff00;
+    color: #000000;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.6);
+}
+
+.help-content {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(26, 26, 26, 0.9);
+    border: 1px solid #00ffff;
+    border-radius: 5px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.help-content.show {
+    display: block;
+    max-height: 200px;
 }
 
 /* Hide overlay when game is running */
@@ -196,48 +303,187 @@ body {
 
 /* Game over state */
 .game-over .overlay-content h2 {
-    color: #ff0000;
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    color: #ff00ff;
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+}
+
+/* Mobile optimizations */
+body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Improved touch targets for mobile */
+.control-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.1s ease;
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+    background: #ffff00;
+    color: #000000;
+}
+
+.mode-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.retro-button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 50px;
 }
 
 /* Responsive design */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    body {
+        padding: 5px;
+        overflow: hidden;
+    }
+    
     .game-container {
         padding: 15px;
-        margin: 10px;
+        margin: 5px;
+        max-width: 100vw;
+        max-height: 95vh;
+        box-sizing: border-box;
     }
     
     .game-title {
-        font-size: 20px;
+        font-size: 16px;
+        margin-bottom: 8px;
     }
     
     #gameCanvas {
-        width: 280px;
-        height: 280px;
+        width: min(85vw, 320px);
+        height: min(85vw, 320px);
+        max-width: 320px;
+        max-height: 320px;
     }
     
     .control-btn {
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
         font-size: 18px;
+        margin: 4px;
+    }
+    
+    .score-board {
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .score-value {
+        font-size: 14px;
+    }
+    
+    .score-label {
+        font-size: 7px;
+    }
+    
+    .mode-switcher {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .mode-btn {
+        padding: 10px 15px;
+        font-size: 11px;
+        min-width: 90px;
     }
 }
 
-/* CRT scan lines effect */
-.game-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        transparent 50%,
-        rgba(0, 255, 0, 0.02) 50%
-    );
-    background-size: 100% 4px;
-    pointer-events: none;
-    z-index: 1;
+@media (max-width: 480px) {
+    .game-container {
+        padding: 10px;
+        margin: 0;
+    }
+    
+    .game-title {
+        font-size: 16px;
+    }
+    
+    #gameCanvas {
+        width: min(85vw, 320px);
+        height: min(85vw, 320px);
+    }
+    
+    .control-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+        margin: 6px;
+    }
+    
+    .info-text {
+        font-size: 7px;
+    }
+    
+    .mode-btn {
+        padding: 8px 12px;
+        font-size: 10px;
+        min-width: 80px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+    .game-container {
+        padding: 5px;
+    }
+    
+    .game-title {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    #gameCanvas {
+        width: min(60vh, 300px);
+        height: min(60vh, 300px);
+    }
+    
+    .score-board {
+        margin-bottom: 5px;
+        padding: 5px;
+    }
+    
+    .controls {
+        margin-bottom: 5px;
+    }
+    
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+        margin: 3px;
+    }
+}
+
+/* CRT scan lines effect - disabled on mobile for performance */
+@media (min-width: 769px) {
+    .game-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            transparent 50%,
+            rgba(255, 255, 0, 0.02) 50%
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 1;
+    }
 }
 
 /* Glitch effect for game over */
