@@ -322,6 +322,11 @@ body {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     transition: all 0.1s ease;
+    -webkit-appearance: none;
+    -webkit-user-select: none;
+    user-select: none;
+    position: relative;
+    z-index: 1;
 }
 
 .control-btn:active {
@@ -368,11 +373,24 @@ body {
         max-height: 320px;
     }
     
+    .controls {
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .control-row {
+        gap: 5px;
+        justify-content: center;
+    }
+    
     .control-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 18px;
-        margin: 4px;
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+        margin: 2px;
+        min-width: 60px;
+        min-height: 60px;
+        flex-shrink: 0;
     }
     
     .score-board {
@@ -405,22 +423,48 @@ body {
     .game-container {
         padding: 10px;
         margin: 0;
+        max-height: 100vh;
     }
     
     .game-title {
-        font-size: 16px;
+        font-size: 14px;
+        margin-bottom: 5px;
     }
     
     #gameCanvas {
-        width: min(85vw, 320px);
-        height: min(85vw, 320px);
+        width: min(85vw, 280px);
+        height: min(85vw, 280px);
+        max-width: 280px;
+        max-height: 280px;
+    }
+    
+    .controls {
+        gap: 3px;
+        margin-bottom: 8px;
+    }
+    
+    .control-row {
+        gap: 3px;
+        justify-content: center;
+        align-items: center;
     }
     
     .control-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 20px;
-        margin: 6px;
+        width: 55px;
+        height: 55px;
+        font-size: 18px;
+        margin: 1px;
+        min-width: 55px;
+        min-height: 55px;
+        flex-shrink: 0;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    .score-board {
+        padding: 6px;
+        margin-bottom: 8px;
     }
     
     .info-text {
@@ -428,9 +472,58 @@ body {
     }
     
     .mode-btn {
-        padding: 8px 12px;
-        font-size: 10px;
-        min-width: 80px;
+        padding: 6px 10px;
+        font-size: 9px;
+        min-width: 70px;
+        margin: 2px;
+    }
+    
+    .game-info {
+        margin-bottom: 5px;
+    }
+}
+
+/* iPhone specific optimizations */
+@media screen and (max-width: 430px) and (-webkit-min-device-pixel-ratio: 2) {
+    .controls {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        margin: 8px auto;
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .control-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2px;
+        width: 100%;
+    }
+    
+    .control-row:first-child {
+        justify-content: center;
+    }
+    
+    .control-row:last-child {
+        justify-content: space-evenly;
+        max-width: 180px;
+    }
+    
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+        margin: 1px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
     }
 }
 
