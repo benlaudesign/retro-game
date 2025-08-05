@@ -110,6 +110,8 @@ class GameManager {
             
             console.log('Creating new DotMuncherGame...');
             this.currentGame = new PacManGame();
+            // Ensure proper initial draw
+            this.currentGame.drawGame();
             console.log('DotMuncherGame created successfully');
         } else if (mode === 'snake') {
             this.snakeBtn.classList.add('active');
@@ -130,6 +132,9 @@ class GameManager {
             
             console.log('Creating new SnakeGame...');
             this.currentGame = new SnakeGame();
+            // Ensure food is properly generated after canvas resize
+            this.currentGame.food = this.currentGame.generateFood();
+            this.currentGame.drawGame();
             console.log('SnakeGame created:', this.currentGame);
         } else if (mode === 'tetris') {
             this.tetrisBtn.classList.add('active');
@@ -150,16 +155,20 @@ class GameManager {
             
             console.log('Creating new BlockFallGame...');
             this.currentGame = new TetrisGame();
+            // Ensure proper initial draw
+            this.currentGame.drawGame();
             console.log('BlockFallGame created:', this.currentGame);
         }
         
         // Auto-start the new game immediately if the previous game was running
         if (wasGameRunning) {
+            console.log('Previous game was running, auto-starting new game...');
             setTimeout(() => {
                 if (this.currentGame && this.currentGame.startGame) {
+                    console.log('Auto-starting game:', this.currentMode);
                     this.currentGame.startGame();
                 }
-            }, 50);
+            }, 100); // Increased timeout to ensure proper initialization
         }
     }
     
