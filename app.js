@@ -1769,8 +1769,8 @@ class TetrisGame {
         // Draw level and lines info
         this.ctx.fillStyle = '#39ff14';
         this.ctx.font = '12px monospace';
-        this.ctx.fillText(`Level: ${this.level}`, 20, 30);
-        this.ctx.fillText(`Lines: ${this.lines}`, 20, 50);
+        this.ctx.fillText(`Level: ${this.level}`, 35, 30);
+        this.ctx.fillText(`Lines: ${this.lines}`, 35, 50);
     }
     
     updateScore() {
