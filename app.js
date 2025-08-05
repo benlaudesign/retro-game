@@ -1175,9 +1175,9 @@ class SnakeGame {
         this.highScore = localStorage.getItem('snakeHighScore') || 0;
         this.highScoreElement.textContent = this.highScore;
         
-        // Snake
+        // Snake - initialize with actual canvas dimensions
         this.snake = [
-            {x: Math.floor(this.tileCountX / 2), y: Math.floor(this.tileCountY / 2)}
+            {x: Math.floor((this.canvas.width / this.gridSize) / 2), y: Math.floor((this.canvas.height / this.gridSize) / 2)}
         ];
         this.dx = 0;
         this.dy = 0;
@@ -1258,7 +1258,7 @@ class SnakeGame {
         this.gameRunning = true;
         this.paused = false;
         this.score = 0;
-        this.snake = [{x: Math.floor(this.tileCountX / 2), y: Math.floor(this.tileCountY / 2)}];
+        this.snake = [{x: Math.floor((this.canvas.width / this.gridSize) / 2), y: Math.floor((this.canvas.height / this.gridSize) / 2)}];
         this.dx = 1; // Start moving right automatically
         this.dy = 0;
         this.food = this.generateFood();
@@ -1312,9 +1312,9 @@ class SnakeGame {
         // Move snake
         const head = {x: this.snake[0].x + this.dx, y: this.snake[0].y + this.dy};
         
-        // Check wall collision - use fixed dimensions to match PacMan
-        const maxTileX = this.tileCountX;
-        const maxTileY = this.tileCountY;
+        // Check wall collision - use actual canvas dimensions
+        const maxTileX = Math.floor(this.canvas.width / this.gridSize);
+        const maxTileY = Math.floor(this.canvas.height / this.gridSize);
         
         if (head.x < 0 || head.x >= maxTileX || head.y < 0 || head.y >= maxTileY) {
             this.gameOver();
@@ -1345,8 +1345,9 @@ class SnakeGame {
     
     generateFood() {
         let food;
-        const maxTileX = this.tileCountX;
-        const maxTileY = this.tileCountY;
+        // Use actual canvas dimensions instead of fixed tile counts
+        const maxTileX = Math.floor(this.canvas.width / this.gridSize);
+        const maxTileY = Math.floor(this.canvas.height / this.gridSize);
         
         do {
             food = {
@@ -1396,9 +1397,9 @@ class SnakeGame {
         this.ctx.strokeStyle = '#003300';
         this.ctx.lineWidth = 0.5;
         
-        // Use fixed dimensions to match PacMan
-        const maxTileX = this.tileCountX;
-        const maxTileY = this.tileCountY;
+        // Use actual canvas dimensions
+        const maxTileX = Math.floor(this.canvas.width / this.gridSize);
+        const maxTileY = Math.floor(this.canvas.height / this.gridSize);
         
         for (let i = 0; i <= maxTileX; i++) {
             // Vertical lines
