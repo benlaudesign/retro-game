@@ -379,12 +379,12 @@ class PacManGame {
             mouthOpen: true
         };
         
-        // Enemy sprites - positioned in center but with upward direction to exit quickly
+        // Enemy sprites - positioned outside center area for immediate action
         this.ghosts = [
-            { x: 13, y: 13, color: '#DDA0DD', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'aggressive', lastPositions: [], stuckCounter: 0, exitDelay: 0 }, // Plum - starts moving up
-            { x: 14, y: 13, color: '#98FB98', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'ambush', lastPositions: [], stuckCounter: 0, exitDelay: 30 },   // Pale Green - delayed exit
-            { x: 13, y: 14, color: '#F4A460', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'patrol', lastPositions: [], stuckCounter: 0, exitDelay: 60 },   // Sandy Brown - delayed exit
-            { x: 14, y: 14, color: '#FFD700', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'random', lastPositions: [], stuckCounter: 0, exitDelay: 90 }    // Khaki - delayed exit
+            { x: 13, y: 10, color: '#DDA0DD', direction: 0, mode: 'chase', target: { x: 0, y: 0 }, personality: 'aggressive', lastPositions: [], stuckCounter: 0, exitDelay: 0 }, // Plum - starts outside
+            { x: 14, y: 10, color: '#98FB98', direction: 1, mode: 'chase', target: { x: 0, y: 0 }, personality: 'ambush', lastPositions: [], stuckCounter: 0, exitDelay: 15 },   // Pale Green - slight delay
+            { x: 15, y: 10, color: '#F4A460', direction: 2, mode: 'chase', target: { x: 0, y: 0 }, personality: 'patrol', lastPositions: [], stuckCounter: 0, exitDelay: 30 },   // Sandy Brown - more delay
+            { x: 12, y: 10, color: '#FFD700', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'random', lastPositions: [], stuckCounter: 0, exitDelay: 45 }    // Khaki - most delay
         ];
         
         // Power mode
@@ -765,46 +765,22 @@ class PacManGame {
             // Handle exit delay - ghosts wait before leaving center
             if (ghost.exitDelay > 0) {
                 ghost.exitDelay--;
-                return; // Skip movement this frame
+                return;
             }
             
-            // Special logic for ghosts in center area - force them to exit upward
-            const inCenterArea = (ghost.x >= 12 && ghost.x <= 15 && ghost.y >= 12 && ghost.y <= 15);
-            if (inCenterArea) {
-                // Force movement upward to exit the center
-                if (this.canMove(ghost.x, ghost.y, 3, index)) { // direction 3 = up
-                    ghost.direction = 3;
-                    const newPos = this.getNextPosition(ghost.x, ghost.y, 3);
-                    ghost.x = newPos.x;
-                    ghost.y = newPos.y;
-                    return;
-                }
-            }
+            // Simple but effective ghost AI
+            const validMoves = [];
             
-            // Get all possible directions, avoiding other ghosts
-            const possibleDirections = [];
-            for (let dir = 0; dir < 4; dir++) {
-                if (this.canMove(ghost.x, ghost.y, dir, index)) {
-                    possibleDirections.push(dir);
-                }
-            }
-            
-            // Handle completely stuck ghosts with improved fallback
-            if (possibleDirections.length === 0) {
-                // First try: find any direction that avoids walls (ignoring other ghosts temporarily)
-                const wallFreeDirections = [];
+            // Check all 4 directions
                 for (let dir = 0; dir < 4; dir++) {
                     const nextPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                    if (this.maze[nextPos.y] && this.maze[nextPos.y][nextPos.x] !== 0) {
-                        wallFreeDirections.push(dir);
-                    }
-                }
                 
-                if (wallFreeDirections.length > 0) {
-                    // Try to find a wall-free direction that doesn't collide with other ghosts
-                    let foundDirection = false;
-                    for (let dir of wallFreeDirections) {
-                        const nextPos = this.getNextPosition(ghost.x, ghost.y, dir);
+                // Check bounds and walls
+                if (nextPos.x >= 0 && nextPos.x < this.mazeWidth && 
+                    nextPos.y >= 0 && nextPos.y < this.mazeHeight &&
+                    this.maze[nextPos.y] && this.maze[nextPos.y][nextPos.x] !== 0) {
+                    
+                    // Don't move into other ghosts (with some tolerance)
                         let blocked = false;
                         for (let i = 0; i < this.ghosts.length; i++) {
                             if (i !== index && this.ghosts[i].x === nextPos.x && this.ghosts[i].y === nextPos.y) {
@@ -812,193 +788,67 @@ class PacManGame {
                                 break;
                             }
                         }
+                    
                         if (!blocked) {
-                            ghost.direction = dir;
-                            const newPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                            ghost.x = newPos.x;
-                            ghost.y = newPos.y;
-                            foundDirection = true;
-                            break;
-                        }
-                    }
-                    
-                    // If all wall-free directions are blocked by ghosts, force move anyway to break deadlock
-                    if (!foundDirection) {
-                        const forcedDir = wallFreeDirections[Math.floor(Math.random() * wallFreeDirections.length)];
-                        ghost.direction = forcedDir;
-                        const newPos = this.getNextPosition(ghost.x, ghost.y, forcedDir);
-                        ghost.x = newPos.x;
-                        ghost.y = newPos.y;
-                    }
-                }
-                
-                // Handle tunnel teleportation
-                if (ghost.x <= 0) {
-                    ghost.x = this.mazeWidth - 2;
-                } else if (ghost.x >= this.mazeWidth - 1) {
-                    ghost.x = 1;
-                }
-                
-                return; // Skip the rest of the logic for this ghost
-            }
-            
-            if (this.powerMode) {
-                // All ghosts run away from Pac-Man when in power mode
-                const dx = ghost.x - this.pacman.x;
-                const dy = ghost.y - this.pacman.y;
-                
-                // Find direction away from Pac-Man
-                let bestDirection = ghost.direction;
-                let maxDistance = 0;
-                
-                possibleDirections.forEach(dir => {
-                    const newPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                    const newDx = newPos.x - this.pacman.x;
-                    const newDy = newPos.y - this.pacman.y;
-                    const distance = Math.sqrt(newDx * newDx + newDy * newDy);
-                    
-                    if (distance > maxDistance) {
-                        maxDistance = distance;
-                        bestDirection = dir;
-                    }
-                });
-                
-                ghost.direction = bestDirection;
-            } else {
-                // Different behavior based on ghost personality
-                let bestDirection = ghost.direction;
-                
-                switch(ghost.personality) {
-                    case 'aggressive':
-                        // Red ghost - directly chases Pac-Man
-                let minDistance = Infinity;
-                        possibleDirections.forEach(dir => {
-                            const newPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                            const distance = Math.sqrt(
-                                (newPos.x - this.pacman.x) ** 2 + 
-                                (newPos.y - this.pacman.y) ** 2
-                            );
-                            // Add small random factor to break ties and prevent grouping
-                            const randomFactor = Math.random() * 0.1;
-                            if (distance + randomFactor < minDistance) {
-                                minDistance = distance + randomFactor;
-                                bestDirection = dir;
-                            }
+                        const distanceToPacman = Math.sqrt(
+                            (nextPos.x - this.pacman.x) ** 2 + (nextPos.y - this.pacman.y) ** 2
+                        );
+                        validMoves.push({
+                            direction: dir,
+                            x: nextPos.x,
+                            y: nextPos.y,
+                            distance: distanceToPacman
                         });
-                        break;
-                        
-                    case 'ambush':
-                        // Pink ghost - tries to ambush Pac-Man by targeting 4 tiles ahead
-                        const targetX = this.pacman.x + (this.pacman.direction === 0 ? 4 : this.pacman.direction === 2 ? -4 : 0);
-                        const targetY = this.pacman.y + (this.pacman.direction === 1 ? 4 : this.pacman.direction === 3 ? -4 : 0);
-                        
-                        let minAmbushDistance = Infinity;
-                possibleDirections.forEach(dir => {
-                    const newPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                            const distance = Math.sqrt(
-                                (newPos.x - targetX) ** 2 + 
-                                (newPos.y - targetY) ** 2
-                            );
-                            // Add small random factor to break ties
-                            const randomFactor = Math.random() * 0.1;
-                            if (distance + randomFactor < minAmbushDistance) {
-                                minAmbushDistance = distance + randomFactor;
-                                bestDirection = dir;
-                            }
-                        });
-                        break;
-                        
-                    case 'patrol':
-                        // Cyan ghost - patrols in patterns, less direct
-                        if (Math.random() < 0.3) {
-                            // 30% chance to move randomly for patrol behavior
-                            bestDirection = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
-                        } else {
-                            // Otherwise chase but with less accuracy
-                            let minPatrolDistance = Infinity;
-                            possibleDirections.forEach(dir => {
-                                const newPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                                const distance = Math.sqrt(
-                                    (newPos.x - this.pacman.x) ** 2 + 
-                                    (newPos.y - this.pacman.y) ** 2
-                                );
-                                // Add small random factor to break ties
-                                const randomFactor = Math.random() * 0.1;
-                                if (distance + randomFactor < minPatrolDistance) {
-                                    minPatrolDistance = distance + randomFactor;
-                        bestDirection = dir;
                     }
-                });
-                        }
-                        break;
+                }
+            }
+            
+            // If no valid moves, force movement (ignore other ghosts)
+            if (validMoves.length === 0) {
+                for (let dir = 0; dir < 4; dir++) {
+                    const nextPos = this.getNextPosition(ghost.x, ghost.y, dir);
+                    if (nextPos.x >= 0 && nextPos.x < this.mazeWidth && 
+                        nextPos.y >= 0 && nextPos.y < this.mazeHeight &&
+                        this.maze[nextPos.y] && this.maze[nextPos.y][nextPos.x] !== 0) {
                         
-                    case 'random':
-                        // Orange ghost - mostly random movement with occasional chase
-                        if (Math.random() < 0.7) {
-                            // 70% chance to move randomly
-                            bestDirection = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
+                        const distanceToPacman = Math.sqrt(
+                            (nextPos.x - this.pacman.x) ** 2 + (nextPos.y - this.pacman.y) ** 2
+                        );
+                        validMoves.push({
+                            direction: dir,
+                            x: nextPos.x,
+                            y: nextPos.y,
+                            distance: distanceToPacman
+                        });
+                    }
+                }
+            }
+            
+            if (validMoves.length > 0) {
+                let chosenMove;
+                
+                if (this.powerMode) {
+                    // Run away - pick the move that maximizes distance from Pac-Man
+                    chosenMove = validMoves.reduce((best, move) => 
+                        move.distance > best.distance ? move : best
+                    );
                         } else {
-                            // 30% chance to chase
-                            let minRandomDistance = Infinity;
-                            possibleDirections.forEach(dir => {
-                                const newPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                                const distance = Math.sqrt(
-                                    (newPos.x - this.pacman.x) ** 2 + 
-                                    (newPos.y - this.pacman.y) ** 2
-                                );
-                                // Add small random factor to break ties
-                                const randomFactor = Math.random() * 0.1;
-                                if (distance + randomFactor < minRandomDistance) {
-                                    minRandomDistance = distance + randomFactor;
-                                    bestDirection = dir;
-                                }
-                            });
-                        }
-                        break;
+                    // Chase Pac-Man - pick the move that minimizes distance (with some randomness)
+                    if (Math.random() < 0.85) {
+                        // 85% of the time, move toward Pac-Man
+                        chosenMove = validMoves.reduce((best, move) => 
+                            move.distance < best.distance ? move : best
+                        );
+                        } else {
+                        // 15% of the time, move randomly for unpredictability
+                        chosenMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                    }
                 }
                 
-                ghost.direction = bestDirection;
-            }
-            
-            // Anti-sticking mechanism: check if ghost has been in same area too long
-            const currentPos = `${ghost.x},${ghost.y}`;
-            if (!ghost.lastPositions) ghost.lastPositions = [];
-            ghost.lastPositions.push(currentPos);
-            if (ghost.lastPositions.length > 8) {
-                ghost.lastPositions.shift();
-            }
-            
-            // If ghost has been oscillating in same small area, force random movement
-            const uniquePositions = new Set(ghost.lastPositions);
-            if (ghost.lastPositions.length === 8 && uniquePositions.size <= 3) {
-                ghost.stuckCounter = (ghost.stuckCounter || 0) + 1;
-                if (ghost.stuckCounter > 5) {
-                    // Force random movement to break out of loops
-                    const randomDir = possibleDirections[Math.floor(Math.random() * possibleDirections.length)];
-                    ghost.direction = randomDir;
-                    ghost.stuckCounter = 0;
-                    ghost.lastPositions = []; // Reset position history
-                }
-            } else {
-                ghost.stuckCounter = 0;
-            }
-            
-            // Move ghost
-            if (this.canMove(ghost.x, ghost.y, ghost.direction, index)) {
-                const newPos = this.getNextPosition(ghost.x, ghost.y, ghost.direction);
-                ghost.x = newPos.x;
-                ghost.y = newPos.y;
-            } else {
-                // If the chosen direction is blocked, try any available direction
-                for (let dir of possibleDirections) {
-                    if (this.canMove(ghost.x, ghost.y, dir, index)) {
-                        const newPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                        ghost.x = newPos.x;
-                        ghost.y = newPos.y;
-                        ghost.direction = dir;
-                        break;
-                    }
-                }
+                // Execute the move
+                ghost.x = chosenMove.x;
+                ghost.y = chosenMove.y;
+                ghost.direction = chosenMove.direction;
             }
             
             // Handle tunnel teleportation
