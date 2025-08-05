@@ -379,12 +379,12 @@ class PacManGame {
             mouthOpen: true
         };
         
-        // Enemy sprites - positioned outside the center box initially with anti-sticking properties (toned down colors)
+        // Enemy sprites - positioned in center but with upward direction to exit quickly
         this.ghosts = [
-            { x: 13, y: 11, color: '#DDA0DD', direction: 0, mode: 'chase', target: { x: 0, y: 0 }, personality: 'aggressive', lastPositions: [], stuckCounter: 0 }, // Plum
-            { x: 14, y: 11, color: '#98FB98', direction: 0, mode: 'chase', target: { x: 0, y: 0 }, personality: 'ambush', lastPositions: [], stuckCounter: 0 },   // Pale Green
-            { x: 15, y: 11, color: '#F4A460', direction: 0, mode: 'chase', target: { x: 0, y: 0 }, personality: 'patrol', lastPositions: [], stuckCounter: 0 },   // Sandy Brown
-            { x: 16, y: 11, color: '#FFD700', direction: 0, mode: 'chase', target: { x: 0, y: 0 }, personality: 'random', lastPositions: [], stuckCounter: 0 }    // Khaki
+            { x: 13, y: 13, color: '#DDA0DD', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'aggressive', lastPositions: [], stuckCounter: 0, exitDelay: 0 }, // Plum - starts moving up
+            { x: 14, y: 13, color: '#98FB98', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'ambush', lastPositions: [], stuckCounter: 0, exitDelay: 30 },   // Pale Green - delayed exit
+            { x: 13, y: 14, color: '#F4A460', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'patrol', lastPositions: [], stuckCounter: 0, exitDelay: 60 },   // Sandy Brown - delayed exit
+            { x: 14, y: 14, color: '#FFD700', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'random', lastPositions: [], stuckCounter: 0, exitDelay: 90 }    // Khaki - delayed exit
         ];
         
         // Power mode
@@ -504,11 +504,11 @@ class PacManGame {
             }
         }
         
-        // Center ghost pen - NOT fully enclosed
-        // Ghost pen walls (leaving top open)
+        // Center ghost pen - with clear exit
+        // Ghost pen walls (leaving top open for exit)
         for (let x = 12; x < 16; x++) {
             maze[12][x] = 0; // bottom wall
-            maze[16][x] = 0; // top wall
+            // Leave top open for ghost exit - no wall at y=16
         }
         maze[13][12] = 0; // left wall
         maze[14][12] = 0;
@@ -516,6 +516,10 @@ class PacManGame {
         maze[13][15] = 0; // right wall
         maze[14][15] = 0;
         maze[15][15] = 0;
+        
+        // Ensure clear exit path above ghost pen
+        maze[11][13] = 3;
+        maze[11][14] = 3;
         
         // Clear ghost pen interior - ensure no pellets in the middle
         maze[13][13] = 3;
@@ -758,6 +762,25 @@ class PacManGame {
     
     updateGhosts() {
         this.ghosts.forEach((ghost, index) => {
+            // Handle exit delay - ghosts wait before leaving center
+            if (ghost.exitDelay > 0) {
+                ghost.exitDelay--;
+                return; // Skip movement this frame
+            }
+            
+            // Special logic for ghosts in center area - force them to exit upward
+            const inCenterArea = (ghost.x >= 12 && ghost.x <= 15 && ghost.y >= 12 && ghost.y <= 15);
+            if (inCenterArea) {
+                // Force movement upward to exit the center
+                if (this.canMove(ghost.x, ghost.y, 3, index)) { // direction 3 = up
+                    ghost.direction = 3;
+                    const newPos = this.getNextPosition(ghost.x, ghost.y, 3);
+                    ghost.x = newPos.x;
+                    ghost.y = newPos.y;
+                    return;
+                }
+            }
+            
             // Get all possible directions, avoiding other ghosts
             const possibleDirections = [];
             for (let dir = 0; dir < 4; dir++) {
