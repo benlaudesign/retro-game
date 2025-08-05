@@ -517,11 +517,17 @@ class PacManGame {
         maze[14][15] = 0;
         maze[15][15] = 0;
         
-        // Clear ghost pen interior
+        // Clear ghost pen interior - ensure no pellets in the middle
         maze[13][13] = 3;
         maze[13][14] = 3;
         maze[14][13] = 3;
         maze[14][14] = 3;
+        
+        // Also clear the immediate surrounding area to prevent any isolated pellets
+        maze[12][13] = 3;
+        maze[12][14] = 3;
+        maze[15][13] = 3;
+        maze[15][14] = 3;
         
         // Add tunnels on left and right sides
         for (let y = 14; y < 16; y++) {
@@ -1890,8 +1896,8 @@ class TetrisGame {
         // Draw level and lines info
         this.ctx.fillStyle = '#39ff14';
         this.ctx.font = '12px monospace';
-        this.ctx.fillText(`Level: ${this.level}`, 10, 30);
-        this.ctx.fillText(`Lines: ${this.lines}`, 10, 50);
+        this.ctx.fillText(`Level: ${this.level}`, 20, 30);
+        this.ctx.fillText(`Lines: ${this.lines}`, 20, 50);
     }
     
     updateScore() {
