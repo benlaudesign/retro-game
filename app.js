@@ -1344,18 +1344,33 @@ class SnakeGame {
     }
     
     generateFood() {
-        let food;
         // Use actual canvas dimensions instead of fixed tile counts
         const maxTileX = Math.floor(this.canvas.width / this.gridSize);
         const maxTileY = Math.floor(this.canvas.height / this.gridSize);
         
-        do {
-            food = {
+        // Find all empty positions
+        const emptyPositions = [];
+        for (let x = 0; x < maxTileX; x++) {
+            for (let y = 0; y < maxTileY; y++) {
+                const occupied = this.snake.some(segment => segment.x === x && segment.y === y);
+                if (!occupied) {
+                    emptyPositions.push({ x, y });
+                }
+            }
+        }
+        
+        // If no empty positions (game should be won), place food anywhere
+        if (emptyPositions.length === 0) {
+            console.log('🏆 Snake fills entire area! Placing food randomly.');
+            return {
                 x: Math.floor(Math.random() * maxTileX),
                 y: Math.floor(Math.random() * maxTileY)
             };
-        } while (this.snake.some(segment => segment.x === food.x && segment.y === food.y));
-        return food;
+        }
+        
+        // Pick a random empty position
+        const randomIndex = Math.floor(Math.random() * emptyPositions.length);
+        return emptyPositions[randomIndex];
     }
     
     drawGame() {
