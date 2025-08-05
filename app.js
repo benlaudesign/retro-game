@@ -459,38 +459,38 @@ class PacManGame {
             }
         }
         
-        // Inner maze structure - more dynamic like reference
-        // Top left area
-        for (let y = 6; y < 10; y++) {
-            for (let x = 6; x < 12; x++) {
-                if (y === 6 || y === 9 || x === 6 || x === 11) {
+        // Inner maze structure - smaller, accessible areas
+        // Top left area - smaller and accessible
+        for (let y = 6; y < 9; y++) {
+            for (let x = 6; x < 10; x++) {
+                if (y === 6 || y === 8 || x === 6 || x === 9) {
                     maze[y][x] = 0;
                 }
             }
         }
         
-        // Top right area
-        for (let y = 6; y < 10; y++) {
-            for (let x = 16; x < 22; x++) {
-                if (y === 6 || y === 9 || x === 16 || x === 21) {
+        // Top right area - smaller and accessible
+        for (let y = 6; y < 9; y++) {
+            for (let x = 18; x < 22; x++) {
+                if (y === 6 || y === 8 || x === 18 || x === 21) {
                     maze[y][x] = 0;
                 }
             }
         }
         
-        // Bottom left area
-        for (let y = 18; y < 22; y++) {
-            for (let x = 6; x < 12; x++) {
-                if (y === 18 || y === 21 || x === 6 || x === 11) {
+        // Bottom left area - smaller and accessible
+        for (let y = 20; y < 23; y++) {
+            for (let x = 6; x < 10; x++) {
+                if (y === 20 || y === 22 || x === 6 || x === 9) {
                     maze[y][x] = 0;
                 }
             }
         }
         
-        // Bottom right area
-        for (let y = 18; y < 22; y++) {
-            for (let x = 16; x < 22; x++) {
-                if (y === 18 || y === 21 || x === 16 || x === 21) {
+        // Bottom right area - smaller and accessible
+        for (let y = 20; y < 23; y++) {
+            for (let x = 18; x < 22; x++) {
+                if (y === 20 || y === 22 || x === 18 || x === 21) {
                     maze[y][x] = 0;
                 }
             }
@@ -521,11 +521,28 @@ class PacManGame {
             maze[y][27] = 3; // tunnel entrance
         }
         
-        // Add power pellets at corners
+        // Add power pellets at corners (only in accessible areas)
         maze[3][3] = 2;
         maze[3][24] = 2;
         maze[25][3] = 2;
         maze[25][24] = 2;
+        
+        // Add some additional maze structure for variety
+        // Horizontal barriers in the middle
+        for (let x = 8; x < 20; x++) {
+            if (x !== 13 && x !== 14) { // Leave gaps for passage
+                maze[8][x] = 0;
+                maze[20][x] = 0;
+            }
+        }
+        
+        // Vertical barriers
+        for (let y = 8; y < 20; y++) {
+            if (y !== 13 && y !== 14) { // Leave gaps for passage
+                maze[y][8] = 0;
+                maze[y][19] = 0;
+            }
+        }
         
         // Clear Pac-Man starting position
         maze[23][14] = 3;
@@ -537,11 +554,13 @@ class PacManGame {
         const pellets = [];
         for (let y = 0; y < this.mazeHeight; y++) {
             for (let x = 0; x < this.mazeWidth; x++) {
+                // Only place pellets in accessible areas (maze value 1 or 2)
                 if (this.maze[y][x] === 1) {
                     pellets.push({ x, y, type: 'pellet' });
                 } else if (this.maze[y][x] === 2) {
                     pellets.push({ x, y, type: 'power' });
                 }
+                // Skip inaccessible areas (maze value 3 = empty space)
             }
         }
         return pellets;
