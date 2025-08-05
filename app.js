@@ -464,7 +464,9 @@ class PacManGame {
         for (let y = 6; y < 9; y++) {
             for (let x = 6; x < 10; x++) {
                 if (y === 6 || y === 8 || x === 6 || x === 9) {
-                    maze[y][x] = 0;
+                    maze[y][x] = 0; // wall
+                } else {
+                    maze[y][x] = 3; // clear interior - no pellets
                 }
             }
         }
@@ -473,7 +475,9 @@ class PacManGame {
         for (let y = 6; y < 9; y++) {
             for (let x = 18; x < 22; x++) {
                 if (y === 6 || y === 8 || x === 18 || x === 21) {
-                    maze[y][x] = 0;
+                    maze[y][x] = 0; // wall
+                } else {
+                    maze[y][x] = 3; // clear interior - no pellets
                 }
             }
         }
@@ -482,7 +486,9 @@ class PacManGame {
         for (let y = 20; y < 23; y++) {
             for (let x = 6; x < 10; x++) {
                 if (y === 20 || y === 22 || x === 6 || x === 9) {
-                    maze[y][x] = 0;
+                    maze[y][x] = 0; // wall
+                } else {
+                    maze[y][x] = 3; // clear interior - no pellets
                 }
             }
         }
@@ -491,7 +497,9 @@ class PacManGame {
         for (let y = 20; y < 23; y++) {
             for (let x = 18; x < 22; x++) {
                 if (y === 20 || y === 22 || x === 18 || x === 21) {
-                    maze[y][x] = 0;
+                    maze[y][x] = 0; // wall
+                } else {
+                    maze[y][x] = 3; // clear interior - no pellets
                 }
             }
         }
@@ -541,6 +549,25 @@ class PacManGame {
             if (y !== 13 && y !== 14) { // Leave gaps for passage
                 maze[y][8] = 0;
                 maze[y][19] = 0;
+            }
+        }
+        
+        // Clear any areas that might be completely walled off
+        // Check for isolated areas and clear them
+        for (let y = 1; y < this.mazeHeight - 1; y++) {
+            for (let x = 1; x < this.mazeWidth - 1; x++) {
+                // If a cell is surrounded by walls on all sides, clear it
+                if (maze[y][x] === 1) { // if it's a pellet
+                    const isWalled = 
+                        maze[y-1][x] === 0 && // wall above
+                        maze[y+1][x] === 0 && // wall below
+                        maze[y][x-1] === 0 && // wall left
+                        maze[y][x+1] === 0;   // wall right
+                    
+                    if (isWalled) {
+                        maze[y][x] = 3; // clear inaccessible pellet
+                    }
+                }
             }
         }
         
