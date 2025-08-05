@@ -379,12 +379,12 @@ class PacManGame {
             mouthOpen: true
         };
         
-        // Enemy sprites - positioned outside center area for immediate action
+        // Enemy sprites - spread out in different areas to prevent clustering
         this.ghosts = [
-            { x: 13, y: 10, color: '#DDA0DD', direction: 0, mode: 'chase', target: { x: 0, y: 0 }, personality: 'aggressive', lastPositions: [], stuckCounter: 0, exitDelay: 0 }, // Plum - starts outside
-            { x: 14, y: 10, color: '#98FB98', direction: 1, mode: 'chase', target: { x: 0, y: 0 }, personality: 'ambush', lastPositions: [], stuckCounter: 0, exitDelay: 15 },   // Pale Green - slight delay
-            { x: 15, y: 10, color: '#F4A460', direction: 2, mode: 'chase', target: { x: 0, y: 0 }, personality: 'patrol', lastPositions: [], stuckCounter: 0, exitDelay: 30 },   // Sandy Brown - more delay
-            { x: 12, y: 10, color: '#FFD700', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'random', lastPositions: [], stuckCounter: 0, exitDelay: 45 }    // Khaki - most delay
+            { x: 5, y: 10, color: '#DDA0DD', direction: 0, mode: 'chase', target: { x: 0, y: 0 }, personality: 'aggressive', lastPositions: [], stuckCounter: 0, exitDelay: 0 },   // Plum - left area
+            { x: 22, y: 10, color: '#98FB98', direction: 2, mode: 'chase', target: { x: 0, y: 0 }, personality: 'ambush', lastPositions: [], stuckCounter: 0, exitDelay: 10 },   // Pale Green - right area
+            { x: 13, y: 5, color: '#F4A460', direction: 1, mode: 'chase', target: { x: 0, y: 0 }, personality: 'patrol', lastPositions: [], stuckCounter: 0, exitDelay: 20 },    // Sandy Brown - top area
+            { x: 13, y: 20, color: '#FFD700', direction: 3, mode: 'chase', target: { x: 0, y: 0 }, personality: 'random', lastPositions: [], stuckCounter: 0, exitDelay: 30 }   // Khaki - bottom area
         ];
         
         // Power mode
@@ -770,68 +770,104 @@ class PacManGame {
                 return;
             }
             
-            // Improved ghost AI with anti-clustering
-            const validMoves = [];
+            // Give each ghost a unique personality/behavior
+            const personality = index % 4; // 0=aggressive, 1=patrol, 2=ambush, 3=random
             
-            // Check all 4 directions
+            // Find all valid moves
+            const validMoves = [];
             for (let dir = 0; dir < 4; dir++) {
-                const nextPos = this.getNextPosition(ghost.x, ghost.y, dir);
-                
-                // Use new tunnel-aware movement check
                 if (this.canMoveOrTunnel(ghost.x, ghost.y, dir, index)) {
+                    const nextPos = this.getNextPosition(ghost.x, ghost.y, dir);
                     
-                    // Calculate distance to Pac-Man
+                    // Handle tunnel teleportation in position calculation
+                    let finalX = nextPos.x;
+                    if (dir === 2 && nextPos.x < 0 && (ghost.y === 14 || ghost.y === 15)) {
+                        finalX = this.mazeWidth - 1;
+                    } else if (dir === 0 && nextPos.x >= this.mazeWidth && (ghost.y === 14 || ghost.y === 15)) {
+                        finalX = 0;
+                    }
+                    
                     const distanceToPacman = Math.sqrt(
-                        (nextPos.x - this.pacman.x) ** 2 + (nextPos.y - this.pacman.y) ** 2
+                        (finalX - this.pacman.x) ** 2 + (nextPos.y - this.pacman.y) ** 2
                     );
                     
-                    // Calculate crowding penalty (distance to other ghosts)
-                    let crowdingPenalty = 0;
-                        for (let i = 0; i < this.ghosts.length; i++) {
+                    // Strong anti-clustering - check for other ghosts in nearby area
+                    let isCrowded = false;
+                    for (let i = 0; i < this.ghosts.length; i++) {
                         if (i !== index) {
-                            const distanceToOtherGhost = Math.sqrt(
-                                (nextPos.x - this.ghosts[i].x) ** 2 + (nextPos.y - this.ghosts[i].y) ** 2
+                            const distToGhost = Math.sqrt(
+                                (finalX - this.ghosts[i].x) ** 2 + (nextPos.y - this.ghosts[i].y) ** 2
                             );
-                            // Penalty increases as ghosts get closer
-                            if (distanceToOtherGhost < 3) {
-                                crowdingPenalty += (3 - distanceToOtherGhost) * 2;
+                            if (distToGhost < 2) {
+                                isCrowded = true;
+                                break;
                             }
                         }
                     }
                     
                     validMoves.push({
                         direction: dir,
-                        x: nextPos.x,
+                        x: finalX,
                         y: nextPos.y,
                         distance: distanceToPacman,
-                        crowdingPenalty: crowdingPenalty
+                        isCrowded: isCrowded
                     });
                 }
             }
             
             if (validMoves.length > 0) {
                 let chosenMove;
-            
-            if (this.powerMode) {
-                    // Run away - pick the move that maximizes distance from Pac-Man and minimizes crowding
-                    chosenMove = validMoves.reduce((best, move) => {
-                        const bestScore = best.distance - best.crowdingPenalty * 0.5;
-                        const moveScore = move.distance - move.crowdingPenalty * 0.5;
-                        return moveScore > bestScore ? move : best;
-                    });
-            } else {
-                    // Chase Pac-Man with anti-clustering
-                    if (Math.random() < 0.8) {
-                        // 80% of the time, move toward Pac-Man but avoid clustering
-                        chosenMove = validMoves.reduce((best, move) => {
-                            // Score favors getting closer to Pac-Man but penalizes crowding
-                            const bestScore = -best.distance - best.crowdingPenalty * 0.8;
-                            const moveScore = -move.distance - move.crowdingPenalty * 0.8;
-                            return moveScore > bestScore ? move : best;
-                        });
-                        } else {
-                        // 20% of the time, move randomly for unpredictability
-                        chosenMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                
+                // Filter out crowded moves if possible
+                const uncrownedMoves = validMoves.filter(move => !move.isCrowded);
+                const movesToConsider = uncrownedMoves.length > 0 ? uncrownedMoves : validMoves;
+                
+                if (this.powerMode) {
+                    // Run away - pick furthest from Pac-Man
+                    chosenMove = movesToConsider.reduce((best, move) => 
+                        move.distance > best.distance ? move : best
+                    );
+                } else {
+                    // Different behavior per ghost personality
+                    switch(personality) {
+                        case 0: // Aggressive - always chase Pac-Man
+                            chosenMove = movesToConsider.reduce((best, move) => 
+                                move.distance < best.distance ? move : best
+                            );
+                            break;
+                        case 1: // Patrol - 60% chase, 40% wander
+                            if (Math.random() < 0.6) {
+                                chosenMove = movesToConsider.reduce((best, move) => 
+                                    move.distance < best.distance ? move : best
+                                );
+                            } else {
+                                chosenMove = movesToConsider[Math.floor(Math.random() * movesToConsider.length)];
+                            }
+                            break;
+                        case 2: // Ambush - try to get ahead of Pac-Man
+                            // Try to predict where Pac-Man is going
+                            const pacmanFutureX = this.pacman.x + (this.pacman.direction === 0 ? 3 : this.pacman.direction === 2 ? -3 : 0);
+                            const pacmanFutureY = this.pacman.y + (this.pacman.direction === 1 ? 3 : this.pacman.direction === 3 ? -3 : 0);
+                            
+                            chosenMove = movesToConsider.reduce((best, move) => {
+                                const distToFuture = Math.sqrt(
+                                    (move.x - pacmanFutureX) ** 2 + (move.y - pacmanFutureY) ** 2
+                                );
+                                const bestDistToFuture = Math.sqrt(
+                                    (best.x - pacmanFutureX) ** 2 + (best.y - pacmanFutureY) ** 2
+                                );
+                                return distToFuture < bestDistToFuture ? move : best;
+                            });
+                            break;
+                        case 3: // Random - 30% chase, 70% random
+                            if (Math.random() < 0.3) {
+                                chosenMove = movesToConsider.reduce((best, move) => 
+                                    move.distance < best.distance ? move : best
+                                );
+                            } else {
+                                chosenMove = movesToConsider[Math.floor(Math.random() * movesToConsider.length)];
+                            }
+                            break;
                     }
                 }
                 
@@ -839,16 +875,6 @@ class PacManGame {
                 ghost.x = chosenMove.x;
                 ghost.y = chosenMove.y;
                 ghost.direction = chosenMove.direction;
-            }
-            
-            // Handle tunnel teleportation for ghosts
-            const ghostNextPos = this.getNextPosition(ghost.x, ghost.y, ghost.direction);
-            if (ghost.direction === 2 && ghostNextPos.x < 0 && (ghost.y === 14 || ghost.y === 15)) {
-                // Moving left off the screen in tunnel rows - teleport to right side
-                ghost.x = this.mazeWidth - 1; // x=27
-            } else if (ghost.direction === 0 && ghostNextPos.x >= this.mazeWidth && (ghost.y === 14 || ghost.y === 15)) {
-                // Moving right off the screen in tunnel rows - teleport to left side
-                ghost.x = 0; // x=0
             }
         });
     }
